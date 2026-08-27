@@ -1,8 +1,9 @@
 # paper-checker
 
-A teacher-facing web app that turns a **question paper** + a **handwritten answer sheet** into a side-by-side, interactive mapping of every question to its answer region on the sheet — with optional AI grading and feedback.
+A teacher-facing web app that turns a **question paper** + a **handwritten answer sheet** into a side-by-side, interactive mapping of every question to its answer region on the sheet with AI grading and feedback.
 
-**Question Extraction → Answer Extraction → Answer Mapping → Grading / Feedback**
+<img width="1354" height="602" alt="image" src="https://github.com/user-attachments/assets/63fcd896-6d5e-4fc9-87d8-05b37b75371c" />
+<img width="1353" height="602" alt="image" src="https://github.com/user-attachments/assets/13511fe5-ead0-45d4-85a8-1790280467dd" />
 
 ---
 
