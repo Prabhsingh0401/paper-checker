@@ -72,7 +72,7 @@ function PdfRenderer({
 
       const page = (await pdf.getPage(currentPage + 1)) as {
         getViewport: (opts: { scale: number }) => { width: number; height: number };
-        render: (params: unknown) => { promise: Promise<void> };
+        render: (params: unknown) => { promise: Promise<void>; cancel: () => void };
       };
       if (cancelled) return;
 
