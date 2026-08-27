@@ -9,7 +9,7 @@ A teacher-facing web app that turns a **question paper** + a **handwritten answe
 
 ## What it does
 
-1. **Upload** a question paper and one (or more) student handwritten answer sheets — PDF or images, up to 10 MB each.
+1. **Upload** a question paper and one (or more) student handwritten answer sheets — PDF, up to 10 MB each.
 2. **Extract** every question in printed order, preserving the original numbering.
 3. **Extract** every student answer with its exact screen position (bounding box) on the answer sheet.
 4. **Map** answers to questions, handling out-of-order answers, unanswered questions, and unmatchable answers.
@@ -18,7 +18,7 @@ A teacher-facing web app that turns a **question paper** + a **handwritten answe
 
 ### Example workflow
 
-A teacher uploads **Question Paper A** and **Student Sheet 1** → sees every question listed on the left, clicks a question → the answer region is highlighted on the answer sheet image/PDF on the right, with the question number badged on the box. Switch pages, zoom, and grade each response.
+A teacher uploads **Question Paper A** and **Student Sheet 1** → sees every question listed on the left, clicks a question → the answer region is highlighted on the answer sheet PDF on the right, with the question number badged on the box. Switch pages, zoom, and grade each response.
 
 ---
 
@@ -27,8 +27,8 @@ A teacher uploads **Question Paper A** and **Student Sheet 1** → sees every qu
 - **Re-evaluate against the same question paper with a NEW answer sheet** — after the first analysis, a teacher can swap in another student's answer sheet and re-run the full pipeline (extraction → mapping → grading) *without re-uploading the question paper*. Each run gets a fresh session, while the question set is preserved (`ChangeAnswerSheetDialog` → `/loading?session=…`).
 - **Sub-part questions kept as distinct entries** — `11 (a)` and `11 (b)` are separate, individually selectable questions (sub-parts are not collapsed).
 - **Unmatched answers section** — any answer that doesn't fit a question is surfaced separately in an amber "Unmatched Answers" panel instead of being silently dropped.
-- **Question-number badge on the highlighted box** — both the image renderer *and* the PDF/canvas renderer draw a Q-label on each highlighted answer region so you always know which question a box belongs to.
-- **Resolution-independent highlighting** — bounding boxes are stored as fractions (0–1) of page dimensions, so they stay accurate regardless of image/PDF resolution or zoom.
+- **Question-number badge on the highlighted box** — both the renderer draw a Q-label on each highlighted answer region so you always know which question a box belongs to.
+- **Resolution-independent highlighting** — bounding boxes are stored as fractions (0–1) of page dimensions, so they stay accurate regardless of PDF resolution or zoom.
 - **Live progress/status pipeline** — the loading screen reports `uploading → extracting → mapping → grading` stages by polling server status.
 - **Session persistence in the browser** — analysis results are cached in `localStorage` so revisiting a session loads instantly without re-calling the API (with a server refetch fallback).
 - **Grading distinct from ground truth** — when no answer key is provided, grades are clearly labelled **"AI-estimated"** in the UI and never presented as factual.
@@ -69,7 +69,7 @@ packages/shared-types   Shared TS types
 - `GET /api/health` — liveness
 - `POST /api/upload` — multipart upload → starts extraction
 - `GET /api/status/:id` — progress polling (`uploading/extracting/mapping/grading/done/error`)
-- `GET /api/mapping/:id` — questions + mappings + unmatched answers + image URLs
+- `GET /api/mapping/:id` — questions + mappings + unmatched answers 
 - `GET /api/grading/:id` — per-question marks, feedback, estimated flag
 
 ### Frontend flow (`apps/web`)
