@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import QuestionList from "@/components/mapping/QuestionList";
 import AnswerSheetViewer from "@/components/mapping/AnswerSheetViewer";
@@ -33,6 +34,14 @@ interface MappedQuestion {
 }
 
 export default function MappingPage() {
+  return (
+    <Suspense fallback={null}>
+      <MappingContent />
+    </Suspense>
+  );
+}
+
+function MappingContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const sessionId = searchParams.get("session");

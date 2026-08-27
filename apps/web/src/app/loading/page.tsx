@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { getExtractionStatus } from "@/lib/api-client";
@@ -16,6 +17,14 @@ const stages: Record<string, string> = {
 };
 
 export default function LoadingPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoadingContent />
+    </Suspense>
+  );
+}
+
+function LoadingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session");
