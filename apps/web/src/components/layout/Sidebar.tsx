@@ -4,12 +4,13 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import ComingSoonDialog from "@/components/common/ComingSoonDialog";
 
 const navItems = [
   { label: "Home", href: "/", icon: "/icons/home.png" },
   { label: "My Classroom", href: "/classroom", icon: "/icons/classroom.png" },
   { label: "Assignments", href: "/assignments", icon: "/icons/assignments.png" },
-  { label: "Exams", href: "/mapping", icon: "/icons/exams.png" },
+  { label: "Exams", href: "/exams", icon: "/icons/exams.png" },
   { label: "My Library", href: "/library", icon: "/icons/library.png" },
 ];
 
@@ -31,18 +32,16 @@ function CloseIcon() {
 
 function CollapseIcon() {
   return (
-    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <rect x="3.75" y="4.5" width="16.5" height="15" rx="2.5" />
-      <path d="M9.75 4.5v15" strokeLinecap="round" />
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
     </svg>
   );
 }
 
 function ExpandIcon() {
   return (
-    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <rect x="3.75" y="4.5" width="16.5" height="15" rx="2.5" />
-      <path d="M14.25 4.5v15" strokeLinecap="round" />
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
     </svg>
   );
 }
@@ -60,11 +59,13 @@ function SidebarContent({
   collapsed,
   onToggle,
   onNavigate,
+  onOpenToolkit,
   showHeader = true,
 }: {
   collapsed: boolean;
   onToggle: () => void;
   onNavigate?: () => void;
+  onOpenToolkit?: () => void;
   showHeader?: boolean;
 }) {
   const pathname = usePathname();
@@ -73,33 +74,60 @@ function SidebarContent({
     <div className="flex flex-col h-full rounded-2xl bg-white">
       {/* Top — logo + collapse button (desktop only) */}
       {showHeader && (
-        <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
-          {!collapsed && (
-            <Image
-              src="/logos/vedaAILogo.png"
-              alt="VedaAI"
-              width={110}
-              height={28}
-              className="h-7 w-auto"
-              priority
-            />
+        <div
+          className={`border-b border-gray-100 ${
+            collapsed
+              ? "flex flex-col items-center px-2 py-4"
+              : "flex items-center justify-between px-4 py-4"
+          }`}
+        >
+          {collapsed ? (
+            <>
+              <button
+                onClick={onToggle}
+                aria-label="Expand sidebar"
+                className="flex items-center justify-center w-7 h-7 rounded-md border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors"
+              >
+                <ExpandIcon />
+              </button>
+              <Image
+                src="/logos/collapsedVedaLogo.png"
+                alt="VedaAI"
+                width={28}
+                height={28}
+                className="h-7 w-auto mt-3"
+                priority
+              />
+            </>
+          ) : (
+            <>
+              <Image
+                src="/logos/vedaAILogo.png"
+                alt="VedaAI"
+                width={110}
+                height={28}
+                className="h-7 w-auto"
+                priority
+              />
+              <button
+                onClick={onToggle}
+                aria-label="Collapse sidebar"
+                className="flex items-center justify-center w-7 h-7 rounded-md border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors"
+              >
+                <CollapseIcon />
+              </button>
+            </>
           )}
-          <button
-            onClick={onToggle}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className={`flex items-center justify-center w-7 h-7 rounded-md border border-gray-200 text-gray-400 hover:bg-gray-50 transition-colors ${
-              collapsed ? "mx-auto" : ""
-            }`}
-          >
-            {collapsed ? <ExpandIcon /> : <CollapseIcon />}
-          </button>
         </div>
       )}
 
       {/* Sparkle button */}
       {!collapsed && (
         <div className="px-3 pt-4 pb-2">
-          <button className="w-full flex items-center justify-center gap-2 rounded-full bg-gray-900 text-white text-sm font-medium py-2.5 hover:bg-gray-800 transition-colors">
+          <button
+            onClick={onOpenToolkit}
+            className="w-full flex items-center justify-center gap-2 rounded-full bg-gray-900 text-white text-sm font-medium py-2.5 hover:bg-gray-800 transition-colors border border-orange-500"
+          >
             <Image src="/icons/sparkle.png" alt="" width={16} height={16} className="brightness-0 invert" />
             AI Teacher&apos;s Toolkit
           </button>
@@ -108,7 +136,8 @@ function SidebarContent({
       {collapsed && (
         <div className="px-3 pt-4 pb-2 flex justify-center">
           <button
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-900 text-white hover:bg-gray-800 transition-colors"
+            onClick={onOpenToolkit}
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-900 text-white hover:bg-gray-800 transition-colors border border-orange-500"
             title="AI Teacher's Toolkit"
           >
             <Image src="/icons/sparkle.png" alt="" width={16} height={16} className="brightness-0 invert" />
@@ -146,7 +175,9 @@ function SidebarContent({
 
       {/* Settings */}
       <div className={`mt-auto ${collapsed ? "px-2 pb-2" : "px-3 pb-2"}`}>
-        <button
+        <Link
+          href="/settings"
+          onClick={onNavigate}
           title="Settings"
           className={`flex items-center gap-3 rounded-lg text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition-colors w-full ${
             collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5"
@@ -154,7 +185,7 @@ function SidebarContent({
         >
           <GearIcon />
           {!collapsed && <span>Settings</span>}
-        </button>
+        </Link>
       </div>
 
       {/* DPS logo + school info */}
@@ -188,24 +219,42 @@ function SidebarContent({
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [toolkitOpen, setToolkitOpen] = useState(false);
+
+  const openToolkit = () => {
+    setMobileOpen(false);
+    setToolkitOpen(true);
+  };
 
   return (
     <>
-      {/* Mobile top bar — floating above content */}
-      <div className="lg:hidden sticky top-3 z-30 mx-3 flex items-center justify-between px-4 py-3 bg-white/80 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100">
-        <Image src="/logos/vedaAILogo.png" alt="VedaAI" width={90} height={24} className="h-6 w-auto" priority />
-        <div className="flex items-center gap-1">
+      {/* Mobile top bar — floating pill device container above content */}
+      <div className="lg:hidden sticky top-3 z-30 mx-3 flex items-center justify-between px-3.5 py-2.5 bg-white/95 backdrop-blur-md rounded-2xl shadow-md border border-gray-100">
+        <div className="flex items-center gap-2">
           <button
-            aria-label="Notifications"
-            className="relative flex items-center justify-center w-9 h-9 rounded-xl text-gray-600 hover:bg-gray-100"
+            onClick={() => window.history.back()}
+            aria-label="Go back"
+            className="p-1 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <Image src="/logos/vedaAILogo.png" alt="VedaAI" width={90} height={24} className="h-6 w-auto" priority />
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <button
+            aria-label="Notifications"
+            className="relative flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
             </svg>
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
+            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-orange-500 border border-white" />
           </button>
           <button
-            className="flex items-center justify-center w-9 h-9 rounded-xl hover:bg-gray-100"
+            className="flex items-center justify-center w-8 h-8 rounded-full overflow-hidden"
             aria-label="User"
           >
             <Image src="/icons/userIcon.png" alt="" width={28} height={28} className="rounded-full" />
@@ -213,7 +262,7 @@ export default function Sidebar() {
           <button
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
-            className="p-2 rounded-xl text-gray-600 hover:bg-gray-100"
+            className="p-1.5 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
           >
             <MenuIcon />
           </button>
@@ -229,6 +278,7 @@ export default function Sidebar() {
         <SidebarContent
           collapsed={collapsed}
           onToggle={() => setCollapsed((c) => !c)}
+          onOpenToolkit={openToolkit}
         />
       </aside>
 
@@ -261,11 +311,17 @@ export default function Sidebar() {
               collapsed={false}
               onToggle={() => {}}
               onNavigate={() => setMobileOpen(false)}
+              onOpenToolkit={openToolkit}
               showHeader={false}
             />
           </div>
         </div>
       </div>
-    </>
+
+      <ComingSoonDialog
+        title="AI Teacher's Toolkit"
+        open={toolkitOpen}
+        onClose={() => setToolkitOpen(false)}
+      />    </>
   );
 }

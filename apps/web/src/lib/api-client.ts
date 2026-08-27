@@ -48,7 +48,7 @@ export function getExtractionStatus(sessionId: string) {
 interface MappingData {
   questions: { number: string; text: string }[];
   mappings: {
-    number: string;
+    questionNumber: string;
     answer: {
       label: string;
       text: string;
@@ -76,6 +76,7 @@ interface MappingData {
     confidence: "high" | "low";
   }[];
   imageUrl: string;
+  questionPaperUrl?: string;
 }
 
 interface GradingData {
@@ -93,4 +94,17 @@ export function getMappingResult(sessionId: string) {
 
 export function getGradingResult(sessionId: string) {
   return request<GradingData>(`/api/grading/${sessionId}`);
+}
+
+export function getQuestionPapers() {
+  return request<{ questionPapers: { id: string; filename: string; questionCount: number }[] }>(
+    "/api/upload/question-papers"
+  );
+}
+
+export function uploadAnswerSheet(answerSheet: File, questionPaperId: string) {
+  const form = new FormData();
+  form.append("answerSheet", answerSheet);
+  form.append("questionPaperId", questionPaperId);
+  return request<{ sessionId: string }>("/api/upload/answer-sheet", { method: "POST", body: form });
 }

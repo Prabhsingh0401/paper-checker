@@ -11,17 +11,10 @@ router.get("/:sessionId", (req: Request, res: Response) => {
     return;
   }
 
-  if (session.status === "error") {
-    res.status(500).json({ error: session.error || "Processing failed." });
-    return;
-  }
-
-  if (!session.grading.length) {
-    res.status(202).json({ error: "Grading not available yet." });
-    return;
-  }
-
-  res.json({ grades: session.grading });
+  res.json({
+    status: session.status,
+    error: session.error,
+  });
 });
 
 export default router;

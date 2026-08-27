@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 
 function BackIcon() {
   return (
@@ -45,51 +46,91 @@ function ChevronDownIcon() {
   );
 }
 
-export default function Topbar() {
+function ComingSoonTooltip({ children }: { children: React.ReactNode }) {
   return (
-    <header className="hidden lg:flex h-14 rounded-2xl bg-white items-center px-4 gap-4 shrink-0">
+    <div className="relative group">
+      {children}
+      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2.5 py-1 rounded-lg bg-gray-900 text-white text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 shadow-lg z-50">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-gray-900" />
+        Coming soon
+      </div>
+    </div>
+  );
+}
+
+const routeConfig: Record<string, { title: string; icon: string }> = {
+  "/": { title: "Home", icon: "/icons/home.png" },
+  "/mapping": { title: "Exams", icon: "/icons/exams.png" },
+  "/loading": { title: "Exams", icon: "/icons/exams.png" },
+  "/classroom": { title: "My Classroom", icon: "/icons/classroom.png" },
+  "/assignments": { title: "Assignments", icon: "/icons/assignments.png" },
+  "/library": { title: "My Library", icon: "/icons/library.png" },
+  "/settings": { title: "Settings", icon: "/icons/home.png" },
+  "/exams": { title: "Exams", icon: "/icons/exams.png" },
+};
+
+export default function Topbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const currentRoute = routeConfig[pathname] || {
+    title: "Exams",
+    icon: "/icons/exams.png",
+  };
+
+  return (
+    <header className="hidden lg:flex h-14 rounded-2xl bg-white items-center px-4 gap-4 shrink-0 shadow-2xs">
       <button
+        onClick={() => router.back()}
         aria-label="Go back"
-        className="flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 hover:bg-gray-50"
+        className="flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
       >
         <BackIcon />
       </button>
 
       <div className="flex items-center gap-2 text-md flex-1 min-w-0">
-        <Image src="/icons/exams.png" alt="" width={18} height={18} className="opacity-50" />
-        <span className="truncate text-gray-300 font-semibold">Exams</span>
+        <Image src={currentRoute.icon} alt="" width={18} height={18} className="opacity-60" />
+        <span className="truncate text-gray-400 font-semibold">{currentRoute.title}</span>
       </div>
 
       <div className="flex items-center gap-1 shrink-0">
-        <button
-          aria-label="Help"
-          className="flex items-center justify-center w-9 h-9 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-800"
-        >
-          <HelpIcon />
-        </button>
+        <ComingSoonTooltip>
+          <button
+            aria-label="Help"
+            className="flex items-center justify-center w-9 h-9 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors"
+          >
+            <HelpIcon />
+          </button>
+        </ComingSoonTooltip>
 
-        <button
-          aria-label="Notifications"
-          className="relative flex items-center justify-center w-9 h-9 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-800"
-        >
-          <BellIcon />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
-        </button>
+        <ComingSoonTooltip>
+          <button
+            aria-label="Notifications"
+            className="relative flex items-center justify-center w-9 h-9 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors"
+          >
+            <BellIcon />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
+          </button>
+        </ComingSoonTooltip>
 
-        <button
-          aria-label="AI assistant"
-          className="flex items-center justify-center w-9 h-9 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-800"
-        >
-          <SparkleIcon />
-        </button>
+        <ComingSoonTooltip>
+          <button
+            aria-label="AI assistant"
+            className="flex items-center justify-center w-9 h-9 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors"
+          >
+            <SparkleIcon />
+          </button>
+        </ComingSoonTooltip>
 
         <div className="w-px h-5 bg-gray-200 mx-1" />
 
-        <button className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg hover:bg-gray-50">
-          <Image src="/icons/userIcon.png" alt="" width={28} height={28} className="rounded-full" />
-          <span className="text-sm text-gray-700 whitespace-nowrap">Guest</span>
-          <ChevronDownIcon />
-        </button>
+        <ComingSoonTooltip>
+          <button className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg hover:bg-gray-50 transition-colors">
+            <Image src="/icons/userIcon.png" alt="" width={28} height={28} className="rounded-full" />
+            <span className="text-sm text-gray-700 whitespace-nowrap font-medium">Guest</span>
+            <ChevronDownIcon />
+          </button>
+        </ComingSoonTooltip>
       </div>
     </header>
   );

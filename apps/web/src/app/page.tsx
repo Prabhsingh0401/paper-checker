@@ -3,7 +3,6 @@
 import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import AnswerKeyInput from "@/components/upload/AnswerKeyInput";
 import { uploadFiles, ApiError } from "@/lib/api-client";
 
 const MAX_SIZE = 10 * 1024 * 1024;
@@ -72,14 +71,28 @@ function SimpleUploadCard({
   error?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) onFileSelect(f);
+  }
 
   if (file) {
     return (
       <div
         onClick={() => inputRef.current?.click()}
-        className={`relative flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed bg-white py-5 px-4 cursor-pointer transition-colors ${
-          error ? "border-error/40" : "border-gray-200 hover:border-orange-300"
-        }`}
+        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={handleDrop}
+        className={`relative flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed bg-white py-8 px-6 cursor-pointer transition-colors ${error
+            ? "border-error/40"
+            : dragging
+              ? "border-orange-400 bg-orange-50/50"
+              : "border-gray-200 hover:border-orange-300"
+          }`}
       >
         <input
           ref={inputRef}
@@ -119,9 +132,15 @@ function SimpleUploadCard({
   return (
     <div
       onClick={() => inputRef.current?.click()}
-      className={`relative flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed bg-white py-8 px-6 cursor-pointer transition-colors ${
-        error ? "border-error/40" : "border-gray-200 hover:border-orange-300"
-      }`}
+      onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={handleDrop}
+      className={`relative flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed bg-white py-8 px-6 cursor-pointer transition-all duration-200 ${error
+          ? "border-error/40"
+          : dragging
+            ? "border-orange-400 bg-orange-50/50 scale-[1.02]"
+            : "border-gray-200 hover:border-orange-300"
+        }`}
     >
       <input
         ref={inputRef}
@@ -132,13 +151,26 @@ function SimpleUploadCard({
           if (f) onFileSelect(f);
         }}
       />
-      <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-gray-700">
-        <UploadIcon />
-      </div>
-      <p className="text-lg font-medium text-gray-900">
-        {label} <span className="text-orange-500">{highlight}</span>
-      </p>
-      <p className="text-xs text-gray-400">Max 10MB</p>
+      {dragging ? (
+        <>
+          <div className="w-9 h-9 rounded-lg bg-orange-100 flex items-center justify-center text-orange-500">
+            <UploadIcon />
+          </div>
+          <p className="text-lg font-medium text-orange-500">Drop it like it&apos;s hot</p>
+          <p className="text-xs text-orange-400">Release to upload</p>
+        </>
+      ) : (
+        <>
+          <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-gray-700">
+            <UploadIcon />
+          </div>
+          <p className="text-lg font-medium text-gray-900">
+            {label} <span className="text-orange-500">{highlight}</span>
+          </p>
+          <p className="text-xs text-gray-400">Drag & drop or click to browse</p>
+          <p className="text-xs text-gray-300">Max 10MB</p>
+        </>
+      )}
       {error && <p className="text-xs text-error mt-1">{error}</p>}
     </div>
   );
@@ -148,7 +180,7 @@ export default function Home() {
   const router = useRouter();
   const [questionPaper, setQuestionPaper] = useState<File | null>(null);
   const [answerSheet, setAnswerSheet] = useState<File | null>(null);
-  const [answerKey, setAnswerKey] = useState<File | null>(null);
+  const [answerKey] = useState<File | null>(null);
   const [qpError, setQpError] = useState<string>();
   const [asError, setAsError] = useState<string>();
   const [submitting, setSubmitting] = useState(false);
@@ -203,7 +235,7 @@ export default function Home() {
   const canStart = questionPaper && answerSheet && !submitting;
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-6 sm:px-8 overflow-hidden">
+    <div className="flex-1 flex flex-col items-center justify-start py-6 px-4 sm:px-8">
       <div className="w-full max-w-4xl text-center">
         <h1 className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 tracking-tight">
           <span>Upload</span>
@@ -213,12 +245,12 @@ export default function Home() {
         </h1>
         <p className="text-md sm:text-lg text-gray-700 mt-3 font-semibold">Upload both files to get started</p>
 
-        <div className="mt-5 mb-2">
+        <div className="mt-4 mb-2">
           <Image
             src="/icons/teacherIcon.png"
             alt="Teacher"
-            width={150}
-            height={150}
+            width={130}
+            height={130}
             className="mx-auto"
             priority
           />
@@ -259,11 +291,10 @@ export default function Home() {
           <button
             disabled={!canStart}
             onClick={handleStart}
-            className={`flex items-center gap-2 rounded-full px-7 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-medium transition-colors ${
-              canStart
-                ? "bg-gray-900 text-white hover:bg-gray-800"
+            className={`flex items-center gap-2 rounded-full px-7 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-medium transition-colors ${canStart
+                ? "bg-gray-900 text-white hover:bg-gray-800 cursor-pointer"
                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
-            }`}
+              }`}
           >
             {submitting ? "Starting…" : "Start Mapping"}
             <ArrowIcon />
