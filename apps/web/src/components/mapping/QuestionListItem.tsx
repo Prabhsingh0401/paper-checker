@@ -36,7 +36,7 @@ export default function QuestionListItem({
       onClick={onClick}
       className={`w-full text-left p-3.5 rounded-[18px] transition-all cursor-pointer border ${
         selected
-          ? "bg-[#fff6f0] border-2 border-[#f97316] shadow-xs"
+          ? "bg-white border-2 border-[#f97316] shadow-xs"
           : "bg-white border-gray-200/80 hover:border-gray-300 shadow-2xs"
       }`}
     >
