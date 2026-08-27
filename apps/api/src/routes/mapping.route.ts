@@ -22,7 +22,13 @@ router.get("/:sessionId", (req: Request, res: Response) => {
     return;
   }
 
-  const baseUrl = `${req.protocol}://${req.get("host")}`;
+  // Build a reliable base URL. On Render, RENDER_EXTERNAL_URL is the public
+  // HTTPS URL — using it avoids mixed-content blocking (req.protocol can be
+  // http behind Render's proxy even when the page is served over https).
+  const host = req.get("host") || "";
+  const proto = req.get("x-forwarded-proto") || req.protocol;
+  const forwardedBase = `${proto}://${host}`;
+  const baseUrl = process.env.RENDER_EXTERNAL_URL || forwardedBase;
 
   res.json({
     questions: session.questions,

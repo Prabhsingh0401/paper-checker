@@ -88,8 +88,8 @@ function LoadingContent() {
   }
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center min-h-[calc(100vh-5rem)] lg:min-h-0 w-full">
-      <div className="text-center px-6 py-12 bg-white rounded-2xl shadow-2xs">
+    <div className="flex-1 flex flex-col items-center justify-center min-h-[calc(100vh-5rem)] lg:min-h-0 w-full bg-white rounded-2xl shadow-2xs">
+      <div className="text-center px-6 py-12">
         <Image
           src="/icons/extractingIcon.png"
           alt=""
