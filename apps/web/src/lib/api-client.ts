@@ -77,6 +77,7 @@ interface MappingData {
   }[];
   imageUrl: string;
   questionPaperUrl?: string;
+  questionPaperId?: string;
 }
 
 interface GradingData {
