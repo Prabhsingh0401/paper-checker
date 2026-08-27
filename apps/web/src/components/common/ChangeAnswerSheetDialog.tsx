@@ -33,6 +33,7 @@ export default function ChangeAnswerSheetDialog({
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>();
+  const [dragActive, setDragActive] = useState(false);
 
   if (!open) return null;
 
@@ -115,7 +116,33 @@ export default function ChangeAnswerSheetDialog({
           ) : (
             <div
               onClick={() => inputRef.current?.click()}
-              className="mt-4 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 bg-white py-12 cursor-pointer hover:border-orange-300 transition-colors"
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setDragActive(true);
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setDragActive(false);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setDragActive(false);
+                const f = e.dataTransfer.files?.[0];
+                if (f) {
+                  selectFile(f);
+                  if (inputRef.current) {
+                    inputRef.current.files = e.dataTransfer.files;
+                  }
+                }
+              }}
+              className={`mt-4 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed bg-white py-12 cursor-pointer transition-colors ${
+                dragActive
+                  ? "border-orange-500 bg-orange-50"
+                  : "border-gray-200 hover:border-orange-300"
+              }`}
             >
               <input
                 ref={inputRef}
