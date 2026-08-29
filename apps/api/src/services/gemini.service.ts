@@ -2,8 +2,28 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
+export class AIOverloadedError extends Error {
+  readonly code = "ai-overloaded" as const;
+  constructor() {
+    super("AI service is temporarily overloaded (503).");
+    this.name = "AIOverloadedError";
+  }
+}
+
+function isOverloadError(err: any): boolean {
+  return (
+    err?.status === 503 ||
+    err?.status === "UNAVAILABLE" ||
+    err?.status === 8 || // gRPC RESOURCE_EXHAUSTED/WORKLOAD_EXCEEDED
+    err?.message?.includes("503") ||
+    err?.message?.includes("UNAVAILABLE") ||
+    err?.message?.toLowerCase().includes("overloaded")
+  );
+}
+
 /**
- * Call Gemini API with automatic exponential backoff retry on rate limits (429 / RESOURCE_EXHAUSTED).
+ * Call Gemini API with automatic exponential backoff retry on rate limits (429 / RESOURCE_EXHAUSTED)
+ * and transient overloads (503). Throws AIOverloadedError once retries are exhausted on a 503.
  */
 export async function callGeminiWithRetry<T>(
   fn: () => Promise<T>,
@@ -11,22 +31,26 @@ export async function callGeminiWithRetry<T>(
   initialDelayMs = 2000
 ): Promise<T> {
   let attempt = 0;
+  let lastWasOverload = false;
   while (true) {
     try {
       return await fn();
     } catch (err: any) {
       attempt++;
-      const isRateLimit =
+      lastWasOverload = isOverloadError(err);
+      const retryable =
         err?.status === 429 ||
         err?.message?.includes("429") ||
         err?.message?.includes("RESOURCE_EXHAUSTED") ||
-        err?.message?.includes("Quota exceeded");
+        err?.message?.includes("Quota exceeded") ||
+        lastWasOverload;
 
-      if (isRateLimit && attempt <= maxRetries) {
+      if (retryable && attempt <= maxRetries) {
         const delay = initialDelayMs * Math.pow(2, attempt - 1) + Math.random() * 1000;
-        console.warn(`[Gemini API] Rate limit hit. Retrying attempt ${attempt}/${maxRetries} in ${Math.round(delay)}ms...`);
+        console.warn(`[Gemini API] Rate limit/overload hit. Retrying attempt ${attempt}/${maxRetries} in ${Math.round(delay)}ms...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
       } else {
+        if (lastWasOverload) throw new AIOverloadedError();
         throw err;
       }
     }

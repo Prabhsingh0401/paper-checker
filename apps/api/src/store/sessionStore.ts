@@ -37,6 +37,7 @@ export interface SessionData {
     estimated: boolean;
   }[];
   error?: string;
+  errorCode?: string;
   questionPaperId?: string;
 }
 

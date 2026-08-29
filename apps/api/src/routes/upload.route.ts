@@ -10,7 +10,7 @@ import {
   getQuestionPaper,
   getQuestionPapers,
 } from "../store/sessionStore";
-import { extractFromQuestionPaper, extractFromAnswerSheet } from "../services/gemini.service";
+import { extractFromQuestionPaper, extractFromAnswerSheet, AIOverloadedError } from "../services/gemini.service";
 import mapAnswersToQuestions from "../services/mapping.service";
 import gradeAnswers from "../services/grading.service";
 
@@ -79,6 +79,7 @@ router.post(
       updateSession(sessionId, {
         status: "error",
         error: err instanceof Error ? err.message : "Pipeline failed",
+        errorCode: err instanceof AIOverloadedError ? "ai-overloaded" : undefined,
       });
     });
   }
@@ -127,6 +128,7 @@ router.post(
       updateSession(sessionId, {
         status: "error",
         error: err instanceof Error ? err.message : "Pipeline failed",
+        errorCode: err instanceof AIOverloadedError ? "ai-overloaded" : undefined,
       });
     });
   }

@@ -14,6 +14,7 @@ router.get("/:sessionId", (req: Request, res: Response) => {
   res.json({
     status: session.status,
     error: session.error,
+    errorCode: session.errorCode,
   });
 });
 

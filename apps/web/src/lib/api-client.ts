@@ -40,7 +40,7 @@ export function uploadFiles(
 }
 
 export function getExtractionStatus(sessionId: string) {
-  return request<{ status: string; progress?: number }>(
+  return request<{ status: string; progress?: number; error?: string; errorCode?: string }>(
     `/api/status/${sessionId}`
   );
 }

@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { getExtractionStatus } from "@/lib/api-client";
+import { useToast } from "@/components/common/toast";
 
 const POLL_MS = 1500;
 
@@ -28,6 +29,7 @@ function LoadingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session");
+  const { showToast } = useToast();
   const [stage, setStage] = useState("uploading");
   const [error, setError] = useState<string | undefined>(undefined);
   const timer = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -48,7 +50,14 @@ function LoadingContent() {
           router.replace(`/mapping?session=${sessionId}`);
         } else if (data.status === "error") {
           clearInterval(timer.current);
-          setError("Extraction failed. Please try uploading again.");
+          if (data.errorCode === "ai-overloaded") {
+            showToast("AI is not available due to load - will be back soon");
+            setError(
+              "Our AI service is overloaded right now. Please wait a moment and try again."
+            );
+          } else {
+            setError("Extraction failed. Please try uploading again.");
+          }
         }
       } catch {
         clearInterval(timer.current);
@@ -59,7 +68,7 @@ function LoadingContent() {
     poll();
     timer.current = setInterval(poll, POLL_MS);
     return () => clearInterval(timer.current);
-  }, [sessionId, router]);
+  }, [sessionId, router, showToast]);
 
   function handleRetry() {
     router.replace("/");
