@@ -20,10 +20,6 @@
     "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-}
-
 body {
   /* background: var(--color-background); */
   color: var(--color-foreground);

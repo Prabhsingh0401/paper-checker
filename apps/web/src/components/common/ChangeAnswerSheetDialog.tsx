@@ -96,9 +96,15 @@ export default function ChangeAnswerSheetDialog({
 
           {file ? (
             <div className="mt-4 flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-              <div className="w-9 h-9 rounded-lg bg-red-500 flex items-center justify-center text-[9px] font-bold text-white shrink-0">
-                PDF
-              </div>
+              {file.type === "application/pdf" ? (
+                <div className="w-9 h-9 rounded-lg bg-red-500 flex items-center justify-center text-[9px] font-bold text-white shrink-0">
+                  PDF
+                </div>
+              ) : (
+                <div className="w-9 h-9 rounded-lg bg-blue-500 flex items-center justify-center text-[9px] font-bold text-white shrink-0">
+                  IMG
+                </div>
+              )}
               <div className="flex-1 min-w-0 text-left">
                 <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
                 <p className="text-xs text-gray-400">

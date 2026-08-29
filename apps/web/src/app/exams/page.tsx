@@ -3,6 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+const PAGE_SIZE = 6;
+
+interface ExamSession {
+  id: string;
+  savedAt: number;
+  questionCount: number;
+  answeredCount: number;
+}
+
 function ArrowIcon() {
   return (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -11,15 +20,30 @@ function ArrowIcon() {
   );
 }
 
+function ChevronLeftIcon() {
+  return (
+    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+    </svg>
+  );
+}
+
+function ChevronRightIcon() {
+  return (
+    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+    </svg>
+  );
+}
+
 export default function ExamsPage() {
   const router = useRouter();
-  const [sessions, setSessions] = useState<
-    { id: string; savedAt: number; questionCount: number; answeredCount: number }[]
-  >([]);
+  const [sessions, setSessions] = useState<ExamSession[]>([]);
+  const [page, setPage] = useState(0);
 
   useEffect(() => {
     try {
-      const items: { id: string; savedAt: number; questionCount: number; answeredCount: number }[] = [];
+      const items: ExamSession[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith("paper_checker_session_")) {
@@ -48,8 +72,13 @@ export default function ExamsPage() {
     }
   }, []);
 
+  const totalPages = Math.max(1, Math.ceil(sessions.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages - 1);
+  const start = safePage * PAGE_SIZE;
+  const pageSessions = sessions.slice(start, start + PAGE_SIZE);
+
   return (
-    <div className="flex-1 flex flex-col p-4 sm:p-6 overflow-y-auto min-h-0 w-full">
+    <div className="flex-1 flex flex-col p-4 sm:p-6 overflow-y-auto w-full">
       <div className="max-w-5xl mx-auto w-full">
         <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
@@ -85,46 +114,75 @@ export default function ExamsPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sessions.map((session, index) => (
-              <div
-                key={session.id}
-                onClick={() => router.push(`/mapping?session=${session.id}`)}
-                className="group bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs hover:shadow-md hover:border-orange-300 transition-all cursor-pointer flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full">
-                      Exam #{sessions.length - index}
-                    </span>
-                    <span className="text-[11px] text-gray-400">
-                      {new Date(session.savedAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </span>
-                  </div>
-                  <h3 className="text-sm font-semibold text-gray-900 group-hover:text-orange-600 transition-colors truncate">
-                    Class X Social Studies Paper #{sessions.length - index}
-                  </h3>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {session.questionCount} Questions extracted • {session.answeredCount} Answered
-                  </p>
-                  <p className="text-[11px] text-gray-400 mt-0.5">
-                    Analyzed at {new Date(session.savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {pageSessions.map((session, index) => {
+                const globalIndex = start + index;
+                return (
+                  <div
+                    key={session.id}
+                    onClick={() => router.push(`/mapping?session=${session.id}`)}
+                    className="group bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs hover:shadow-md hover:border-orange-300 transition-all cursor-pointer flex flex-col justify-between min-w-0 overflow-hidden"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center justify-between mb-2 gap-2">
+                        <span className="text-xs font-bold text-white bg-gray-900 px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0">
+                          Exam #{sessions.length - globalIndex}
+                        </span>
+                        <span className="text-[11px] text-gray-400 whitespace-nowrap">
+                          {new Date(session.savedAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </span>
+                      </div>
+                      <h3 className="text-sm font-semibold text-gray-900 group-hover:text-orange-600 transition-colors truncate">
+                        Class X Social Studies Paper #{sessions.length - globalIndex}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1 truncate">
+                        {session.questionCount} Questions extracted • {session.answeredCount} Answered
+                      </p>
+                      <p className="text-[11px] text-gray-400 mt-0.5 truncate">
+                        Analyzed at {new Date(session.savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
 
-                <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-medium text-orange-500">
-                  <span>View Analysis &amp; Feedback</span>
-                  <ArrowIcon />
-                </div>
-              </div>
-            ))}
-          </div>
+                    <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-medium text-orange-500">
+                      <span className="whitespace-nowrap">View Analysis &amp; Feedback</span>
+                      <ArrowIcon />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Pagination */}
+            <div className="mt-6 flex items-center justify-between">
+              <button
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={safePage === 0}
+                aria-label="Previous page"
+                className="flex items-center gap-1 px-4 py-2 rounded-full text-xs font-medium text-white bg-gray-900 hover:bg-gray-800 transition-colors disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+              >
+                <ChevronLeftIcon />
+                Prev
+              </button>
+              <span className="text-xs font-medium text-gray-500">
+                Page {safePage + 1} of {totalPages}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={safePage === totalPages - 1}
+                aria-label="Next page"
+                className="flex items-center gap-1 px-4 py-2 rounded-full text-xs font-medium text-white bg-gray-900 hover:bg-gray-800 transition-colors disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+              >
+                Next
+                <ChevronRightIcon />
+              </button>
+            </div>
+          </>
         )}
       </div>
     </div>
   );
 }
-

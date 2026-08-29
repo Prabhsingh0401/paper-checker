@@ -115,9 +115,15 @@ function SimpleUploadCard({
             <CloseIcon />
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-red-500 flex items-center justify-center shrink-0">
-              <span className="text-[9px] font-bold text-white leading-none tracking-tight">PDF</span>
-            </div>
+            {file.type === "application/pdf" ? (
+              <div className="w-10 h-10 rounded-lg bg-red-500 flex items-center justify-center shrink-0">
+                <span className="text-[9px] font-bold text-white leading-none tracking-tight">PDF</span>
+              </div>
+            ) : (
+              <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center shrink-0">
+                <span className="text-[9px] font-bold text-white leading-none tracking-tight">IMG</span>
+              </div>
+            )}
             <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
               <p className="text-xs text-gray-400">{formatFileSize(file.size)}</p>
